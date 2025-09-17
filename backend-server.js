@@ -14,7 +14,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // --- Authentication Endpoints ---
-app.post('/api/auth/login', async (req, res) => {
+app.post('/auth/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ success: false, message: 'Email and password are required' });
@@ -48,7 +48,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-app.post('/api/auth/verify', async (req, res) => {
+app.post('/auth/verify', async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ success: false, message: 'Authorization token required' });
@@ -73,7 +73,7 @@ app.post('/api/auth/verify', async (req, res) => {
     res.status(401).json({ success: false, message: 'Invalid or expired token' });
 });
 
-app.get('/api/user/info', async (req, res) => {
+app.get('/user/info', async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ success: false, message: 'Authorization token required' });
@@ -98,7 +98,7 @@ app.get('/api/user/info', async (req, res) => {
 });
 
 // --- Research Data Endpoints ---
-app.post('/api/research/save', async (req, res) => {
+app.post('/research/save', async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ success: false, message: 'Authorization token required' });
@@ -125,7 +125,7 @@ app.post('/api/research/save', async (req, res) => {
 });
 
 // --- Subscription Endpoints ---
-app.get('/api/subscription/check', async (req, res) => {
+app.get('/subscription/check', async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ success: false, message: 'Authorization token required' });
