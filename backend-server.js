@@ -42,10 +42,6 @@ app.post('/auth/login', async (req, res) => {
             } 
         });
 
-    } catch (error) {
-        console.error('Login error:', error.response?.data || error.message);
-        res.status(500).json({ success: false, message: 'Internal server error during login' });
-    }
 });
 
 app.post('/auth/verify', async (req, res) => {
@@ -95,6 +91,48 @@ app.get('/user/info', async (req, res) => {
         }
     }
     res.status(401).json({ success: false, message: 'Invalid token or user not found' });
+});
+
+// Create new contact (signup)
+app.post('/auth/signup', async (req, res) => {
+    try {
+        const { email, password, firstName, lastName, plan } = req.body;
+        
+        if (!email || !password || !firstName || !lastName) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'All fields are required' 
+            });
+        }
+        
+        // Create contact in GoHighLevel
+        const contact = await createContact(email, password, firstName, lastName, plan);
+        
+        if (contact) {
+            res.json({ 
+                success: true, 
+                message: 'Account created successfully',
+                user: {
+                    id: contact.id,
+                    email: contact.email,
+                    firstName: contact.firstName,
+                    lastName: contact.lastName,
+                    name: `${firstName} ${lastName}`
+                }
+            });
+        } else {
+            res.status(400).json({ 
+                success: false, 
+                message: 'Failed to create account. Email may already exist.' 
+            });
+        }
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Internal server error' 
+        });
+    }
 });
 
 // --- Research Data Endpoints ---
@@ -165,14 +203,15 @@ async function findContactByEmail(email) {
     }
 }
 
-async function createContact(email, password) {
+async function createContact(email, password, firstName = null, lastName = null, plan = 'Individual') {
     try {
         const response = await axios.post(`${API_BASE_URL}/contacts`, {
             email: email,
-            firstName: email.split('@')[0],
+            firstName: firstName || email.split('@')[0],
+            lastName: lastName || '',
             customFields: [
                 { id: 'custom_field_id_for_password', value: password },
-                { id: 'custom_field_id_for_subscription_tier', value: 'Individual' }
+                { id: 'custom_field_id_for_subscription_tier', value: plan }
             ]
         }, {
             headers: { Authorization: `Bearer ${API_ACCESS_TOKEN}` }
